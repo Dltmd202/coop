@@ -43,7 +43,7 @@ public class WorkController {
         model.addAttribute("prevTime", timeQuery.prev());
         model.addAttribute("nextTime", timeQuery.next());
         model.addAttribute("studentId", user.getUserId());
-        return "/work/workDetail";
+        return "work/workDetail";
     }
 
     @GetMapping("/students/{studentId}/works")
@@ -68,7 +68,7 @@ public class WorkController {
         model.addAttribute("prevTime", timeQuery.prev());
         model.addAttribute("nextTime", timeQuery.next());
         model.addAttribute("studentId", studentId);
-        return "/work/workDetail";
+        return "work/workDetail";
     }
 
     @PostMapping("/works")
