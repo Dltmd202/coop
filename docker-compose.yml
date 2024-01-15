@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  mysql:
+    image: mysql:8.0.34
+    container_name: part-time
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: part_time
+    volumes:
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql-data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: partTime
+    environment:
+      spring.datasource.url: jdbc:mysql://part-time:3306/part_time
+      spring.datasource.username: root
+      spring.datasource.password: 1234
+      spring.jpa.hibernate.ddl-auto: none
+    ports:
+      - "80:8080"
+    depends_on:
+      - mysql

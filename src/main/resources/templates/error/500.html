@@ -1,0 +1,13 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+  <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+  <div class="py-5 text-center">
+    <h2>서버 내부의 오류입니다.</h2>
+    <p th:text="${message}"></p>
+  </div>
+</div>
+</body>
+</html>

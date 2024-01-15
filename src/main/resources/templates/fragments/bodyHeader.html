@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<nav class="header bg-body-tertiary navbar" th:fragment="bodyHeader">
+    <div class="d-flex justify-content-between container-fluid">
+        <div>
+            <ul class="nav nav-pills pull-right">
+                <li><a href="/">생협 근태관리</a></li>
+            </ul>
+            <a href="/"><h3 class="text-muted">근태관리</h3></a>
+        </div>
+        <div th:if="${session.LOGIN_MEMBER}" class="d-flex align-items-center">
+            <a th:href="@{/users/mypage}" th:text="${session.LOGIN_MEMBER.getName()}">이승환</a>
+            <a class="btn btn-primary ms-2" href="/users/logout">로그아웃</a>
+        </div>
+        <div th:unless="${session.LOGIN_MEMBER}">
+            <a class="btn btn-primary" href="/users/login">로그인</a>
+            <a class="btn btn-primary ms-2" href="/students/new">회원가입</a>
+        </div>
+    </div>
+</nav>
+<nav class="navbar bg-body-tertiary">
+    <div class="container-lg">
+        <a class="navbar-brand" href="#">Navbar</a>
+    </div>
+</nav>

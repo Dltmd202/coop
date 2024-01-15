@@ -1,0 +1,27 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    properties:
+      hibernate:
+        default_batch_fetch_size: 20
+        show_sql: true
+        format_sql: true
+    database: mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/part_time
+    username: root
+    password: 1234
+server:
+  servlet:
+    session:
+      timeout: 86400
+      tracking-modes: cookie
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          servlet: error
+    com.zaxxer.hikari: TRACE
+    com.com.zaxxer.HikariConfig: DEBUG

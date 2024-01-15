@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+
+    .fieldErrorExplain {
+        color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <form role="form" th:object="${studentForm}" method="post">
+        <div class="form-group mt-4">
+            <div class="d-flex">
+                <label th:for="name">이름</label>
+            </div>
+            <input type="text" th:field="*{name}" class="mt-1 form-control"
+                   placeholder="이름을 입력하세요" maxlength="10"
+                   th:class="${#fields.hasErrors('name')}? 'form-control is-invalid' : 'form-control'">
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <label th:for="studentId">학번</label>
+                <div id="studentIdConfirm" class="btn btn-primary">학번 중복 확인</div>
+            </div>
+            <input type="text" th:field="*{studentId}" class="mt-1 form-control"
+                   placeholder="학번을 입력하세요" maxlength="10"
+                   th:class="${#fields.hasErrors('studentId')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('studentId')}" th:errors="*{studentId}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <label th:for="email">이메일</label>
+                <div id="email-confirm" class="btn btn-primary">이메일 확인</div>
+            </div>
+            <input type="email" th:field="*{email}" class="form-control mt-1"
+                   placeholder="아이디를 입력하세요" maxlength="100"
+                   th:class="${#fields.hasErrors('email')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <div class="d-flex">
+                <label th:for="password">비밀번호</label>
+            </div>
+            <input type="password" th:field="*{password}" class="form-control mt-1"
+                   placeholder="비밀번호를 입력하세요" maxlength="100"
+                   th:class="${#fields.hasErrors('password')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="repeatedPassword">비밀번호 확인</label>
+            <input type="password" th:field="*{repeatedPassword}" class="form-control mt-1"
+                   placeholder="비밀번호를 확인해주세요" maxlength="100"
+                   th:class="${#fields.hasErrors('repeatedPassword')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('repeatedPassword')}" th:errors="*{repeatedPassword}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="phoneNumber">전화번호</label>
+            <input type="text" th:field="*{phoneNumber}" class="form-control mt-1"
+                   placeholder="전화번호를 입력해주세요" maxlength="30"
+                   th:class="${#fields.hasErrors('phoneNumber')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}">Incorrect date</p>
+        </div>
+        <div class="row mt-4">
+            <div class="form-group col-4">
+                <label th:for="bank">은행</label>
+                <input type="text" th:field="*{bank}" class="form-control mt-1"
+                       placeholder="은행을 입력해주세요" maxlength="30"
+                       th:class="${#fields.hasErrors('bank')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                <p th:if="${#fields.hasErrors('bank')}" th:errors="*{bank}">Incorrect date</p>
+            </div>
+            <div class="form-group col-8">
+                <label th:for="account">계좌번호</label>
+                <input type="text" th:field="*{account}" class="form-control mt-1"
+                       placeholder="계좌번호를 입력해주세요" maxlength="30"
+                       th:class="${#fields.hasErrors('account')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                <p th:if="${#fields.hasErrors('account')}" th:errors="*{account}">Incorrect date</p>
+            </div>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="status">학적상태</label>
+            <select th:field="*{status}" class="form-control mt-1"
+                    th:class="${#fields.hasErrors('status')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                <option value="" disabled selected>학적 상태를 선택해주세요</option>
+                <option th:each="academicStatus : ${T(org.kt.parttime.user.entity.AcademicStatus).values()}"
+                        th:value="${academicStatus}" th:text="${academicStatus.desc}"></option>
+            </select>
+            <p th:if="${#fields.hasErrors('status')}" th:errors="*{status}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="department">학부</label>
+            <input type="text" th:field="*{department}" class="form-control mt-1"
+                   placeholder="학부를 입력해주세요" maxlength="30"
+                   th:class="${#fields.hasErrors('department')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('department')}" th:errors="*{department}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4 d-flex">
+            <div class="w-25">
+                <label th:for="grade">학년</label>
+                <div>
+                    <input type="number" th:field="*{grade}" class="form-control mt-1"
+                           placeholder="학년를 입력해주세요" min="0" max="99"
+                           th:class="${#fields.hasErrors('grade')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                    <p th:if="${#fields.hasErrors('grade')}" th:errors="*{grade}">Incorrect date</p>
+                </div>
+            </div>
+            <div class="ms-2 w-25">
+                <label th:for="semester">학기</label>
+                <input type="number" th:field="*{semester}" class="form-control mt-1"
+                       placeholder="학년를 입력해주세요" min="0" max="99"
+                       th:class="${#fields.hasErrors('semester')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                <p th:if="${#fields.hasErrors('semester')}" th:errors="*{semester}">Incorrect date</p>
+            </div>
+        </div>
+        <button id="joinButton" type="submit"
+                class="btn btn-primary mt-4">Submit</button>
+    </form>
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const emailConfirmButton = document.getElementById('email-confirm');
+        const studentIdConfirmButton = document.getElementById('studentIdConfirm');
+        const joinButton = document.getElementById('joinButton');
+
+        const studentIdInput = document.getElementById('studentId');
+        const emailInput = document.getElementById('email');
+
+        let emailConfirm = false;
+        let studentIdConfirm = false;
+
+        if(studentIdInput.value && emailInput.value){
+            joinButton.classList.remove('disabled');
+            joinButton.removeAttribute('disabled');
+        } else {
+            joinButton.classList.add('disabled');
+            joinButton.setAttribute('disabled', undefined);
+        }
+
+        studentIdInput.addEventListener('input', () => {
+            studentIdConfirm = false;
+            studentIdInput.classList.remove('is-valid');
+        })
+
+        emailInput.addEventListener('input', () => {
+            emailConfirm = false;
+            emailInput.classList.remove('is-valid');
+        })
+
+        const checkAvailToSubmit = (emailConfirm, studentIdConfirm) => {
+            if(emailConfirm && studentIdConfirm) {
+                joinButton.classList.remove('disabled');
+                joinButton.removeAttribute('disabled');
+            }
+        }
+
+        emailConfirmButton.addEventListener('click', async () => {
+            const email = emailInput.value;
+            if(!email) return;
+            try{
+                const response = await fetch(`/api/user/email?email=${email}`)
+                if(!response.ok){
+                    alert('다시 시도해주세요.')
+                } else {
+                    emailConfirm = await response.json();
+                }
+
+                if(!emailConfirm){
+                    emailInput.classList.add('is-invalid');
+                    emailInput.classList.remove('is-valid');
+                } else {
+                    emailInput.classList.add('is-valid');
+                    emailInput.classList.remove('is-invalid');
+                }
+
+                checkAvailToSubmit(emailConfirm, studentIdConfirm);
+            } catch (e){
+                alert('다시 시도해주세요.')
+            }
+        })
+
+        studentIdConfirmButton.addEventListener('click', async () => {
+            const studentId = studentIdInput.value;
+            if(!studentId || studentId.length < 10) return;
+            try{
+                const response = await fetch(`/api/user/studentId?studentId=${studentId}`)
+                if(!response.ok){
+                    alert('다시 시도해주세요.')
+                } else {
+                    studentIdConfirm = await response.json();
+                }
+
+                if(!studentIdConfirm){
+                    studentIdInput.classList.add('is-invalid');
+                    studentIdInput.classList.remove('is-valid');
+                } else {
+                    studentIdInput.classList.add('is-valid');
+                    studentIdInput.classList.remove('is-invalid');
+                }
+
+                checkAvailToSubmit(emailConfirm, studentIdConfirm);
+            } catch (e){
+                alert('다시 시도해주세요.')
+            }
+        })
+    });
+</script>
+</body>
+</html>

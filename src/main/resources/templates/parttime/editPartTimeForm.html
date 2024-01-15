@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+
+    .fieldErrorExplain {
+        color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <h2>근로장학 변경</h2>
+    <form
+      role="form"
+      th:action="@{/parttime-groups/{groupId}/parttimes/{id}/edit (groupId=${partTimeGroupId}, id=${partTimeId})}"
+      th:object="${partTimeForm}"
+      method="post">
+        <div class="form-group mt-4">
+            <div class="d-flex">
+                <label th:for="name">이름</label>
+            </div>
+            <input type="text" th:field="*{name}" class="mt-1 form-control"
+                   placeholder="이름을 입력하세요" maxlength="100"
+                   th:class="${#fields.hasErrors('name')}? 'form-control is-invalid' : 'form-control'">
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4 d-flex">
+            <div class="w-25">
+                <label th:for="year">년도</label>
+                <div>
+                    <input type="number" th:field="*{year}" class="form-control mt-1"
+                           placeholder="년도를 입력해주세요" min="1000" max="9999"
+                           th:class="${#fields.hasErrors('year')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                    <p th:if="${#fields.hasErrors('year')}" th:errors="*{year}">Incorrect date</p>
+                </div>
+            </div>
+            <div class="ms-2 w-25">
+                <label th:for="semester">학기</label>
+                <input type="number" th:field="*{semester}" class="form-control mt-1"
+                       placeholder="학기를 입력해주세요" min="0" max="99"
+                       th:class="${#fields.hasErrors('semester')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                <p th:if="${#fields.hasErrors('semester')}" th:errors="*{semester}">Incorrect date</p>
+            </div>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="hourPrice">시급</label>
+            <input type="number" step="any" th:field="*{hourPrice}" class="form-control mt-1"
+                   placeholder="시급을 입력해주세요" maxlength="30"
+                   th:class="${#fields.hasErrors('hourPrice')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('hourPrice')}" th:errors="*{hourPrice}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="overtimeAllowance">초과수당</label>
+            <input type="number" step="any" th:field="*{overtimeAllowance}" class="form-control mt-1"
+                   placeholder="초과근무수당을 입력해주세요" maxlength="30"
+                   th:class="${#fields.hasErrors('overtimeAllowance')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('overtimeAllowance')}" th:errors="*{overtimeAllowance}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <label th:for="nightAllowance">야간근무</label>
+            <input type="number" step="any" th:field="*{nightAllowance}" class="form-control mt-1"
+                   placeholder="야간근무수당을 입력해주세요" maxlength="30"
+                   th:class="${#fields.hasErrors('nightAllowance')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+            <p th:if="${#fields.hasErrors('nightAllowance')}" th:errors="*{nightAllowance}">Incorrect date</p>
+        </div>
+        <button id="joinButton" type="submit"
+                class="btn btn-primary mt-4">Submit</button>
+    </form>
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hourPriceInput = document.getElementById('hourPrice');
+        const overtimeAllowanceInput = document.getElementById('overtimeAllowance');
+        const nightAllowanceInput = document.getElementById('nightAllowance');
+
+        hourPriceInput.addEventListener('input', () => {
+            const hourPrice = hourPriceInput.value;
+            overtimeAllowanceInput.value = Math.ceil(hourPrice * 0.5);
+            nightAllowanceInput.value = Math.ceil(hourPrice * 0.5);
+        })
+
+    });
+</script>
+</body>
+</html>

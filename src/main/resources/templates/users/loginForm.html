@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+</style>
+<body>
+<div class="container">
+  <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+  <form id="join-form" role="form" action="/users/login" th:object="${studentLoginForm}" method="post">
+    <div class="form-group mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <label th:for="email">이메일</label>
+      </div>
+      <input type="email" th:field="*{email}" class="form-control mt-1"
+             placeholder="아이디를 입력하세요" maxlength="100"
+             th:class="${#fields.hasErrors('email')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+      <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Incorrect date</p>
+    </div>
+    <div class="form-group mt-4">
+      <div class="d-flex">
+        <label th:for="password">비밀번호</label>
+      </div>
+      <input type="password" th:field="*{password}" class="form-control mt-1"
+             placeholder="비밀번호를 입력하세요" maxlength="100"
+             th:class="${#fields.hasErrors('password')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+      <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Incorrect date</p>
+    </div>
+    <div th:class="mt-2">
+      <input class="form-check-input" type="checkbox" value="" id="rememberEmail">
+      <label class="form-check-label" for="rememberEmail">
+        아이디 기억하기
+      </label>
+    </div>
+    <button id="joinButton" type="submit"
+            class="btn btn-primary mt-4">로그인</button>
+  </form>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const rememberId = document.getElementById('rememberEmail');
+    const emailInput = document.getElementById('email');
+    const joinButton = document.getElementById('joinButton');
+    const joinForm = document.getElementById('join-form');
+
+    if(localStorage.getItem('email')){
+      emailInput.value = localStorage.getItem('email');
+      rememberId.checked = true;
+    }
+
+    joinButton.addEventListener('click', () => {
+      if(rememberId.checked){
+        const email = emailInput.value;
+        localStorage.setItem('email', email);
+      } else {
+        localStorage.removeItem('email');
+      }
+      joinForm.submit();
+    })
+  })
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+</style>
+<body>
+<div class="container">
+  <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+
+  <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <div>
+      <div class="d-flex justify-content-between">
+        <h2>관리자 계정</h2>
+        <a href="/admins/edit">수정하기</a>
+      </div>
+    </div>
+    <div class="mt-2">
+      <div class="row">
+        <div class="col-lg-8 col-md-7 col-sm-6 mt-3">
+          <h5>이름</h5>
+          <div class="d-flex">
+            <p th:text="${user.name}"></p>
+            <p class="ms-1" th:text="${user.position}">사장</p>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-5 col-sm-6 mt-3">
+          <h5>이메일</h5>
+          <p th:text="${user.email}">abc@123.com</p>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-lg-8 col-md-7 col-sm-6 mt-3">
+          <div class="d-flex justify-content-between">
+            <h5>내보내기</h5>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <div>
+                <input type="number" class="form-control mt-1" id="year"
+                       placeholder="년도" min="2000" max="2100">
+              </div>
+            </div>
+            <div class="col-4">
+              <input type="number" class="form-control mt-1" id="month"
+                     placeholder="월" min="0" max="13">
+            </div>
+            <div class="col-4">
+              <button id="export-button" class="btn btn-success">내보내기</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-5 col-sm-6 mt-3">
+          <h5>근로장학 관리</h5>
+          <ul>
+            <li><a href="/parttime-groups">근로장학 목록</a></li>
+            <li><a href="/parttimes/new">근로장학 생성</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const exportButton = document.getElementById('export-button');
+    const yearInput  = document.getElementById('year');
+    const monthInput  = document.getElementById('month');
+
+    const date = new Date(Date.now());
+    yearInput.value = date.getFullYear();
+    monthInput.value = date.getMonth() + 1;
+
+    monthInput.addEventListener('change', () => {
+      if(monthInput.value >= 13){
+        yearInput.value = parseInt(yearInput.value) + 1;
+        monthInput.value = 1;
+      } else if(monthInput.value <= 0) {
+        yearInput.value = parseInt(yearInput.value) - 1;
+        monthInput.value = 12;
+      }
+    })
+
+    yearInput.addEventListener('change', () => {
+      if(!yearInput.value){
+        const date = new Date(Date.now());
+        yearInput.value = date.getFullYear();
+      }
+    })
+
+    exportButton.addEventListener('click', () => {
+      const year = yearInput.value;
+      const month = monthInput.value;
+
+      if(confirm("다운로드하시겠습니까?"))
+        window.location = `/api/wage?year=${year}&month=${month}`;
+    })
+  })
+</script>
+</body>
+</html>

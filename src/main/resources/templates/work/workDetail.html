@@ -1,0 +1,314 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<head>
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+  <style>
+    .change-month:hover {
+        transition: opacity 0.3s;
+    }
+
+    td, th {
+        text-align: center;
+    }
+
+  </style>
+</head>
+</style>
+<body>
+<div class="container-lg">
+  <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+  <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <div class="d-flex justify-content-evenly">
+      <h2 th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}" th:text="${partTimeGroup.name}">
+        GS 편의점
+      </h2>
+      <h2 th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}">
+        <a th:text="${partTimeGroup.name}" th:href="@{/parttime-groups/{id} (id=${partTimeGroup.id}, year=${time.getYear()}, month=${time.getMonth()})}">GS 편의점</a>
+      </h2>
+    </div>
+    <div class="d-flex justify-content-around align-self-center mt-2">
+      <a th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}" class="change-month"
+        th:href="@{/parttime-groups/{id}/works (id=${partTimeGroup.id}, year=${prevTime.year}, month=${prevTime.month})}">
+        <img width="30px" class="d-block" src="/img/prev.svg">
+      </a>
+      <a th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}" class="change-month"
+         th:href="@{/parttime-groups/{id}/students/{studentId}/works (id=${partTimeGroup.id}, year=${prevTime.year}, month=${prevTime.month}, studentId=${studentId})}">
+        <img width="30px" class="d-block" src="/img/prev.svg">
+      </a>
+      <div class="d-flex">
+        <div class="d-flex">
+          <h3 th:text="${time.year}"></h3>
+          <h3>년</h3>
+        </div>
+        <div class="d-flex ms-2">
+          <h3 th:text="${time.month}"></h3>
+          <h3>월</h3>
+        </div>
+      </div>
+      <a th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}"
+        th:href="@{/parttime-groups/{id}/works (id=${partTimeGroup.id}, year=${nextTime.year}, month=${nextTime.month})}">
+        <img width="30px" class="d-block" src="/img/next.svg">
+      </a>
+      <a th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}" class="change-month"
+         th:href="@{/parttime-groups/{id}/students/{studentId}/works (id=${partTimeGroup.id}, year=${nextTime.year}, month=${nextTime.month}, studentId=${studentId})}">
+        <img width="30px" class="d-block" src="/img/next.svg">
+      </a>
+    </div>
+    <div th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}" class="d-flex justify-content-end mt-4">
+      <div>
+        <div class="d-flex flex-row-reverse">
+          <a href="/parttime-groups">목록으로</a>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>이름</span>
+          <span class="ms-2" th:text="${student.getName()}"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="h-100">
+    <div class="my-3 p-3 bg-body rounded shadow-sm">
+      <div th:each="works : ${monthlyWork.getWeeklyWorks().values()}" class="mb-5">
+        <div class="d-flex">
+          <h5 th:text="${works.week}">1</h5>
+          <h5 class="ms-1">주차</h5>
+        </div>
+        <div>
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th>구분</th>
+              <th>날짜</th>
+              <th class="d-none d-sm-table-cell">시작</th>
+              <th class="d-none d-sm-table-cell">종료</th>
+              <th class="d-none d-md-table-cell">근무</th>
+              <th class="d-none d-md-table-cell">야간</th>
+              <th class="d-none d-md-table-cell">초과</th>
+              <th class="d-none d-lg-table-cell">주간근무합계</th>
+              <th>일급</th>
+              <th class="d-none d-md-table-cell">누적일급</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+              <tr th:each="work : ${works.getWorks()}" th:class="${work.statusStyle()}">
+                <td>
+                  <div class="d-flex">
+                    <span th:text="${work.getPartTimeName()}">저녁</span>
+                    <span class="d-none d-lg-table-cell">
+                      (<span th:text="${work.getFormattedPartTimeHourPrice()}">12,000</span>)
+                    </span>
+                  </div>
+                </td>
+                <td th:class="${work.isWeekend()} ? 'text-danger' : ''">
+                  <span th:text="${work.getDay()}">10</span>
+                  (<span th:text="${work.getFormattedDayOfWeek()}">월</span>)
+                </td>
+                <td class="d-none d-sm-table-cell" th:text="${work.getFormattedStartTime()}"></td>
+                <td class="d-none d-sm-table-cell" th:text="${work.getFormattedEndTime()}"></td>
+                <td class="d-none d-md-table-cell" th:text="${work.getFormattedWorkTime()}"></td>
+                <td class="d-none d-md-table-cell" th:text="${work.getFormattedNightWorkTime()}"></td>
+                <td class="d-none d-md-table-cell" th:text="${work.getFormattedOverWorkTime()}"></td>
+                <td class="d-none d-lg-table-cell" th:text="${work.getAccumulatedWeekdayWorkTime()}"></td>
+                <td th:text="${work.getFormattedTotalWage()}"></td>
+                <td class="d-none d-md-table-cell" th:text="${work.getFormattedAccumulatedTotalAage()}"></td>
+                <td>
+                  <form th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}"
+                    th:action="@{/parttime-groups/{id}/works/{workId}/delete (id=${partTimeGroup.id}, workId=${work.getId()})}"
+                    method="post">
+                    <button class="btn btn-primary" role="button">삭제</button>
+                  </form>
+                  <th:block th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}">
+                    <div class="btn-group">
+                      <div class="btn btn-success">
+                        <form
+                          th:id="'approve-' + ${work.getId()}" method="post"
+                          th:action="@{/parttime-groups/{id}/students/{studentId}/works/{workId}/approve (id=${partTimeGroup.id}, workId=${work.getId()}, studentId=${studentId})}">
+                          <div th:onclick="'approveWork(' + ${work.getId()} + ')'" >승인</div>
+                        </form>
+                      </div>
+                      <div class="btn btn-danger">
+                        <form
+                          th:id="'reject-' + ${work.getId()}" method="post"
+                          th:action="@{/parttime-groups/{id}/students/{studentId}/works/{workId}/reject (id=${partTimeGroup.id}, workId=${work.getId()}, studentId=${studentId})}">
+                          <div th:onclick="'rejectWork(' + ${work.getId()} + ')'">반려</div>
+                        </form>
+                      </div>
+                    </div>
+                  </th:block>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-end flex-wrap">
+
+          <div class="d-flex ms-3">
+            <div class="d-flex">
+              <p>순수 주간급여</p>
+            </div>
+            <div class="d-flex ms-2">
+              <p th:text="${works.getFormattedPureWage()}">3,000원</p>
+              <p class="ms-1">원</p>
+            </div>
+          </div>
+
+          <div class="d-flex ms-3">
+            <div class="d-flex">
+              <p>주간 주휴수당</p>
+            </div>
+            <div class="d-flex ms-2">
+              <p th:text="${works.getFormattedWeeklyHolidayAllowance()}">3,000원</p>
+              <p class="ms-1">원</p>
+            </div>
+          </div>
+
+          <div class="d-flex ms-3">
+            <div class="d-flex">
+              <p>전체 주간급여</p>
+            </div>
+            <div class="d-flex ms-2">
+              <p th:text="${works.getFormattedWage()}">3,000원</p>
+              <p class="ms-1">원</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <div class="d-flex ms-3">
+          <div class="d-flex">
+            <p>월급</p>
+          </div>
+          <div class="d-flex ms-2">
+            <p th:text="${monthlyWork.getFormattedMonthlyWage()}">3,000원</p>
+            <p class="ms-1">원</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="h-100">
+    <div class="my-3 p-3 bg-body rounded shadow-sm">
+      <form
+        method="post"
+        th:object="${workForm}">
+        <div class="form-group mt-4">
+          <div class="d-flex">
+            <label th:for="name">구분</label>
+          </div>
+          <select id="partTimeId" name="partTimeId"
+                  th:class="${#fields.hasErrors('partTimeId')}? 'form-select is-invalid' : 'form-select'"
+                  class="form-select">
+            <option value="0" disabled selected>근로장학 그룹을 선택하세요</option>
+            <th:block th:each="partTime : ${partTimes}">
+              <option th:value="${partTime.id}" th:text="${partTime.name}"></option>
+            </th:block>
+          </select>
+          <p th:if="${#fields.hasErrors('partTimeId')}" th:errors="*{partTimeId}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+          <div class="d-flex">
+            <label th:for="name">시작시간</label>
+          </div>
+          <input type="datetime-local" th:field="*{startTime}" class="mt-1 form-control"
+                 th:class="${#fields.hasErrors('startTime')}? 'form-control is-invalid' : 'form-control'">
+          <p th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+          <div class="d-flex">
+            <label th:for="name">종료시간</label>
+          </div>
+          <input type="datetime-local" th:field="*{endTime}" class="mt-1 form-control"
+                 th:class="${#fields.hasErrors('endTime')}? 'form-control is-invalid' : 'form-control'">
+          <p th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">Incorrect date</p>
+        </div>
+        <button id="new-work" disabled class="btn btn-primary mt-3 disabled">제출하기</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const roundTo30Minutes = (input) => {
+    const date = new Date(input.value);
+
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset() + (9 * 60));
+
+    const minutes = date.getMinutes();
+    const roundedMinutes = Math.round(minutes / 30) * 30;
+    date.setMinutes(roundedMinutes + 540);
+
+    const formattedDate = date.toISOString().slice(0, 16);
+    input.value = formattedDate;
+  }
+
+  const approveWork = (workId) => {
+    const form = document.getElementById(`approve-${workId}`);
+    if(confirm("정말 승인하시겠습니까?")) form.submit();
+    else return false;
+  }
+
+  const rejectWork = (workId) => {
+    const form = document.getElementById(`reject-${workId}`);
+    if(confirm("정말 반려하시겠습니까?")) form.submit();
+    else return false;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+    const newWorkSubmitButton = document.getElementById('new-work');
+    const partTimeSelect = document.getElementById('partTimeId');
+
+    const validateForm = () => {
+      const startTimeValue = new Date(startTimeInput.value);
+      const endTimeValue = new Date(endTimeInput.value);
+      const partTimeId = partTimeSelect.value;
+
+      const timeDifferenceInMilliseconds = endTimeValue - startTimeValue;
+      const timeDifferenceInHours = timeDifferenceInMilliseconds / (1000 * 60 * 60);
+
+      return startTimeValue < endTimeValue && timeDifferenceInHours < 24 && partTimeId != 0
+    }
+
+    partTimeSelect.addEventListener('change', () => {
+      if(validateForm()){
+        newWorkSubmitButton.removeAttribute('disabled');
+        newWorkSubmitButton.classList.remove('disabled');
+      } else {
+        newWorkSubmitButton.setAttribute('disabled', undefined);
+        newWorkSubmitButton.classList.add('disabled');
+      }
+    })
+
+    startTimeInput.addEventListener('blur', () => {
+      roundTo30Minutes(startTimeInput);
+      if(validateForm()){
+        newWorkSubmitButton.removeAttribute('disabled');
+        newWorkSubmitButton.classList.remove('disabled');
+      } else {
+        newWorkSubmitButton.setAttribute('disabled', undefined);
+        newWorkSubmitButton.classList.add('disabled');
+      }
+    })
+
+    endTimeInput.addEventListener('blur', () => {
+      roundTo30Minutes(endTimeInput);
+
+      if(validateForm()){
+        newWorkSubmitButton.removeAttribute('disabled');
+        newWorkSubmitButton.classList.remove('disabled');
+      } else {
+        newWorkSubmitButton.setAttribute('disabled', undefined);
+        newWorkSubmitButton.classList.add('disabled');
+      }
+    })
+
+  })
+</script>
+</body>
+</html>

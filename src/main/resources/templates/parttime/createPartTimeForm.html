@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+
+    .fieldErrorExplain {
+        color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <h2>근로장학 추가</h2>
+    <form role="form" action="/parttimes/new" th:object="${partTimeForm}" method="post">
+        <div class="form-group mt-4 d-flex">
+            <div class="w-25">
+                <label th:for="grade">년도</label>
+                <div>
+                    <input type="number" th:field="*{year}" class="form-control mt-1"
+                           placeholder="년도를 입력해주세요" min="1000" max="9999"
+                           th:class="${#fields.hasErrors('year')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                    <p th:if="${#fields.hasErrors('year')}" th:errors="*{year}">Incorrect date</p>
+                </div>
+            </div>
+            <div class="ms-2 w-25">
+                <label th:for="semester">학기</label>
+                <input type="number" th:field="*{semester}" class="form-control mt-1"
+                       placeholder="학기를 입력해주세요" min="0" max="99"
+                       th:class="${#fields.hasErrors('semester')}? 'mt-1 form-control is-invalid' : 'mt-1 form-control'">
+                <p th:if="${#fields.hasErrors('semester')}" th:errors="*{semester}">Incorrect date</p>
+            </div>
+        </div>
+        <div class="form-group mt-4">
+            <div class="d-flex">
+                <label>근로장학 그룹</label>
+            </div>
+            <div>
+                <div class="mt-2">
+                    <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="groupType"
+                          id="group-type-create"
+                          th:class="${#fields.hasErrors('groupType')}? 'form-check-input is-invalid' : 'form-check-input'"
+                          checked
+                          value="create">
+                        <label class="form-check-label" for="group-type-create">생성하기</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          th:class="${#fields.hasErrors('groupType')}? 'form-check-input is-invalid' : 'form-check-input'"
+                          type="radio"
+                          name="groupType"
+                          id="group-type-select"
+                          value="select">
+                        <label class="form-check-label" for="group-type-select">선택하기</label>
+                    </div>
+                </div>
+                <div class="d-flex mt-2">
+                    <div>
+                        <input
+                          type="text" name="groupCreate"
+                          placeholder="새로운 근로장학 그룹의 이름을 입력하세요"
+                          th:class="${#fields.hasErrors('groupCreate')}? 'form-control disabled is-invalid' : 'form-control disabled'"
+                          id="groupCreate" class="form-control disabled">
+                    </div>
+                    <div>
+                        <select
+                          id="groupSelect" name="groupSelect" disabled
+                          th:class="${#fields.hasErrors('groupSelect')}? 'form-select ms-3 is-invalid' : 'form-select ms-3 disabled'"
+                          class="form-select ms-3" aria-label="Default select example">
+                            <option disabled selected>근로장학 그룹을 선택하세요</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group mt-4">
+            <div class="d-flex">
+                <label th:for="name">이름</label>
+            </div>
+            <input type="text" th:field="*{name}" class="mt-1 form-control"
+                   placeholder="이름을 입력하세요" maxlength="100"
+                   th:class="${#fields.hasErrors('name')}? 'form-control is-invalid' : 'form-control'">
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Incorrect date</p>
+        </div>
+        <div class="form-group mt-4">
+            <div class="d-flex">
+                <label th:for="name">시급</label>
+            </div>
+            <input type="text" th:field="*{hourPrice}" class="mt-1 form-control"
+                   placeholder="이름을 입력하세요" maxlength="100"
+                   th:class="${#fields.hasErrors('hourPrice')}? 'form-control is-invalid' : 'form-control'">
+            <p th:if="${#fields.hasErrors('hourPrice')}" th:errors="*{hourPrice}">Incorrect date</p>
+        </div>
+        <button id="joinButton" type="submit"
+                class="btn btn-primary mt-4">Submit</button>
+    </form>
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const nameInput = document.getElementById('name');
+        const yearInput = document.getElementById('year');
+        const semesterInput = document.getElementById('semester');
+
+        const groupCreate = document.getElementById('groupCreate');
+        const groupSelect = document.getElementById('groupSelect');
+
+        const groupTypeCreate = document.getElementById('group-type-create');
+        const groupTypeSelect = document.getElementById('group-type-select');
+
+
+        const refreshGroupList = async() =>{
+            const year = yearInput.value;
+            const semester = semesterInput.value;
+
+            if (!year || !semester) return;
+            try {
+                console.log('hi');
+                const response = await fetch(`/api/group-parttimes?year=${year}&semester=${semester}`);
+
+                if (!response.ok) {
+                    alert('다시 시도해주세요.')
+                } else {
+                    const res = await response.json();
+                    groupSelect.innerHTML = '<option disabled selected>근로장학 그룹을 선택하세요</option>';
+                    res.forEach(g => {
+                        groupSelect.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+                    })
+                }
+            } catch (e) {
+                alert('다시 시도해주세요.')
+            }
+        }
+
+        yearInput.addEventListener('change', async () => {
+            await refreshGroupList();
+
+        })
+
+        semesterInput.addEventListener('change', async () => {
+            await refreshGroupList();
+        })
+
+        groupTypeCreate.addEventListener('change', () => {
+            if(this.checked){
+                groupSelect.removeAttribute('disabled');
+                groupCreate.setAttribute('disabled', undefined);
+                groupSelect.classList.remove('is-invalid');
+                groupCreate.classList.remove('is-invalid');
+            } else {
+                groupCreate.removeAttribute('disabled');
+                groupSelect.setAttribute('disabled', undefined);
+                groupSelect.classList.remove('is-invalid');
+                groupCreate.classList.remove('is-invalid');
+            }
+        })
+
+        groupTypeSelect.addEventListener('change', async () => {
+            if(this.checked){
+                groupCreate.removeAttribute('disabled');
+                groupSelect.setAttribute('disabled', undefined);
+                groupSelect.classList.remove('is-invalid');
+                groupCreate.classList.remove('is-invalid');
+            } else {
+                groupSelect.removeAttribute('disabled');
+                groupCreate.setAttribute('disabled', undefined);
+                groupSelect.classList.remove('is-invalid');
+                groupCreate.classList.remove('is-invalid');
+            }
+            await refreshGroupList();
+        })
+    });
+</script>
+</body>
+</html>

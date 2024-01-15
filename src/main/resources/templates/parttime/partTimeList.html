@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+  <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+  <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <div class="d-flex justify-content-between">
+      <h2>근로장학</h2>
+      <a th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}"
+         class="btn btn-primary" href="/parttimes/new">추가하기</a>
+    </div>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>이름</th>
+        <th>년도</th>
+        <th>학기</th>
+        <th th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}"></th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr th:each="partTime : ${partTimes.getContent()}">
+          <td th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}" th:text="${partTime.name}"></td>
+          <td th:if="${session.LOGIN_MEMBER.role == 'ADMIN'}">
+            <a th:text="${partTime.name}" th:href="@{/parttime-groups/{id} (id=${partTime.id})}">GS 편의점</a>
+          </td>
+          <td th:text="${partTime.year}"></td>
+          <td th:text="${partTime.semester}"></td>
+          <td th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}">
+            <form th:action="@{/parttime-groups/{id}/join (id=${partTime.id})}" method="post">
+              <button class="btn btn-primary" role="button">등록하기</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <nav aria-label="...">
+      <ul class="pagination">
+        <li
+          th:class="${partTimes.hasPrevious()} ? 'page-item': 'page-item disabled'"
+          class="page-item disabled">
+          <a class="page-link" th:href="@{/parttimes(page=0)}">맨앞</a>
+        </li>
+        <li
+          th:class="${partTimes.hasPrevious()} ? 'page-item': 'page-item disabled'"
+            class="page-item disabled">
+          <a class="page-link" th:href="@{/parttimes(page=${partTimes.getNumber() - 1})}">이전</a>
+        </li>
+        <th:block
+          th:if="${partTimes.totalPages > partTimes.number + 1 - (partTimes.number % 5) + 4}"
+          th:each="i : ${#numbers.sequence(partTimes.number + 1 - (partTimes.number % 5), partTimes.number + 1 - (partTimes.number % 5) + 4)}">
+          <li th:class="${partTimes.number + 1 == i} ? 'page-item active' : 'page-item'">
+            <a class="page-link" th:href="@{/parttimes(page=${i - 1})}" th:text="${i}"></a>
+          </li>
+        </th:block>
+        <th:block
+          th:if="${partTimes.totalPages <= partTimes.number + 1 - (partTimes.number % 5) + 4}"
+          th:each="i : ${#numbers.sequence(partTimes.number + 1 - (partTimes.number % 5), partTimes.totalPages)}">
+          <li th:class="${partTimes.number + 1 == i} ? 'page-item active' : 'page-item'">
+            <a class="page-link" th:href="@{/parttimes(page=${i - 1})}" th:text="${i}"></a>
+          </li>
+        </th:block>
+
+        <li th:class="${partTimes.hasNext()} ? 'page-item' : 'page-item disabled'">
+          <a class="page-link" th:href="@{/parttimes(page=${partTimes.number + 1})}">이후</a>
+        </li>
+        <li th:class="${partTimes.hasNext()} ? 'page-item' : 'page-item disabled'">
+          <a class="page-link" th:href="@{/parttimes(page=${partTimes.totalPages - 1})}">맨뒤</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <div th:replace="fragments/footer :: footer"/>
+</div>
+</body>
+</html>
