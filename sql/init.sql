@@ -22,7 +22,7 @@ create table part_time
     semester           int          null,
     year               int          null,
     part_time_group_id bigint       null,
-    constraint fk_part_time_group_id
+    constraint pt_fk__part_time_group_id
         foreign key (part_time_group_id) references part_time_group (id)
 );
 
@@ -37,7 +37,7 @@ create table user
     name               varchar(10)  null,
     password           varchar(255) not null,
     role               varchar(255) null,
-    constraint uk_email
+    constraint user_uk_email
         unique (email)
 );
 
@@ -46,7 +46,7 @@ create table admin
     position varchar(20) null,
     id       bigint      not null
         primary key,
-    constraint fk_user
+    constraint admin_fk_user
         foreign key (id) references user (id)
 );
 
@@ -62,9 +62,9 @@ create table student
     student_id   varchar(20)  null,
     id           bigint       not null
         primary key,
-    constraint uk_student_id
+    constraint student_uk_student_id
         unique (student_id),
-    constraint fk_user
+    constraint student_fk_user
         foreign key (id) references user (id)
 );
 
@@ -76,11 +76,11 @@ create table student_part_time_group
     last_modified_date datetime null,
     part_time_group_id bigint   null,
     student_id         bigint   null,
-    constraint fk_part_time_group
+    constraint sptg_fk_part_time_group
         foreign key (part_time_group_id) references part_time_group (id),
-    constraint fk_student
+    constraint sptg_fk_student
         foreign key (student_id) references student (id),
-    index ix_student_id__ptg_id(student_id, part_time_group_id)
+    index sptg_ix_student_id__ptg_id(student_id, part_time_group_id)
 );
 
 create table wage
@@ -96,13 +96,13 @@ create table wage
     part_time_id       bigint   null,
     part_time_group_id bigint   null,
     student_id         bigint   null,
-    constraint fk_part_time
+    constraint wage_fk_part_time
         foreign key (part_time_id) references part_time (id),
-    constraint fk_student
+    constraint wage_fk_student
         foreign key (student_id) references student (id),
-    constraint fk_part_time_group
+    constraint wage_fk_part_time_group
         foreign key (part_time_group_id) references part_time_group (id),
-    index ix_part_time_group_id__student_id(part_time_group_id, student_id)
+    index wage_ix_part_time_group_id__student_id(part_time_group_id, student_id)
 );
 
 create table work
@@ -123,15 +123,15 @@ create table work
     part_time_group_id         bigint       null,
     student_id                 bigint       null,
     student_part_time_group_id bigint       null,
-    constraint fk_student
+    constraint work_fk_student
         foreign key (student_id) references student (id),
-    constraint fk_part_time
+    constraint work_fk_part_time
         foreign key (part_time_id) references part_time (id),
-    constraint fk_part_time_group
+    constraint work_fk_part_time_group
         foreign key (part_time_group_id) references part_time_group (id),
-    constraint fk_admin
+    constraint work_fk_admin
         foreign key (confirmer_id) references admin (id),
-    constraint fk_student_part_time_group
+    constraint work_fk_student_part_time_group
         foreign key (student_part_time_group_id) references student_part_time_group (id),
-    index ix_part_time_group_id__student_id__status(part_time_group_id, student_id, status)
+    index work_ix_part_time_group_id__student_id__status(part_time_group_id, student_id, status)
 );
