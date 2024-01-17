@@ -66,7 +66,7 @@ public class Student extends User{
     @Column
     private Integer semester;
 
-    public Student(String name, String email, String password, String studentId, String phoneNumber, String account, AcademicStatus status, String department, Integer grade, Integer semester){
+    public Student(String name, String email, String password, String studentId, String phoneNumber, String account, AcademicStatus status, String department, Integer grade, Integer semester, String bank){
         super(name, email, password, UserRole.STUDENT);
         this.studentId = studentId;
         this.phoneNumber = phoneNumber;
@@ -75,6 +75,7 @@ public class Student extends User{
         this.department = department;
         this.grade = grade;
         this.semester = semester;
+        this.bank = bank;
     }
 
     @Override

@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -67,13 +68,15 @@ public class PartTimeGroup extends BaseTimeEntity {
         return weekDayTotalWorkTime >= 15 ? (int) ((weekDayTotalWorkTime / 5) * getHolidayAllowance()) : 0;
     }
 
-    public int calculateWeeklyWage(List<Work> works){
-        int weeklyWage = works.stream()
-                .map(Work::calculateDailyWage)
-                .mapToInt(Integer::intValue)
+    public int calculateHolidayAllowance(List<Work> works, PartTime partTime){
+        if (!Objects.equals(partTime.getHourPrice(), getHolidayAllowance())) return 0;
+        double weekDayTotalWorkTime = works.stream()
+                .filter(Work::isWeekDay)
+                .filter(Work::nonRejected)
+                .map(Work::getWorkTime)
+                .mapToDouble(Double::valueOf)
                 .sum();
-        weeklyWage += this.calculateHolidayAllowance(works);
-        return weeklyWage;
+        return weekDayTotalWorkTime >= 15 ? (int) ((weekDayTotalWorkTime / 5) * getHolidayAllowance()) : 0;
     }
 
     public Integer getHolidayAllowance(){

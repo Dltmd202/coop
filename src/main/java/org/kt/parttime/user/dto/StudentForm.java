@@ -65,9 +65,10 @@ public class StudentForm {
         this.department = student.getDepartment();
         this.grade = student.getGrade();
         this.semester = student.getSemester();
+        this.bank = student.getBank();
     }
 
     public Student toModel(){
-        return new Student(name, email, password, studentId, phoneNumber, account, status, department, grade, semester);
+        return new Student(name, email, password, studentId, phoneNumber, account, status, department, grade, semester, bank);
     }
 }

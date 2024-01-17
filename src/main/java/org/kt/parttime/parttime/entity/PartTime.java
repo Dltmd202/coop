@@ -29,7 +29,7 @@ public class PartTime extends BaseTimeEntity {
     @Column
     private Integer semester;
 
-    @Column
+    @Column(nullable = false)
     private Integer hourPrice;
 
     @Column
@@ -75,15 +75,15 @@ public class PartTime extends BaseTimeEntity {
     }
 
     public Integer calculateDailyPureWage(Work work){
-        return (int) (work.getWorkTime() * hourPrice);
+        return (int) Math.round(work.getWorkTime() * hourPrice);
     }
 
     public Integer calculateDailyOvertimeAllowance(Work work){
-        return (int) (work.getOverWorkTime() * overtimeAllowance);
+        return (int) Math.round(work.getOverWorkTime() * overtimeAllowance);
     }
 
     public Integer calculateDailyNightAllowance(Work work){
-        return (int) (work.getNightWorkTime() * nightAllowance);
+        return (int) Math.round(work.getNightWorkTime() * nightAllowance);
     }
 
     /**

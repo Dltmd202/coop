@@ -15,6 +15,7 @@
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <h2>근로장학 변경</h2>
     <form
+      id="edit-parttime-form"
       role="form"
       th:action="@{/parttime-groups/{groupId}/parttimes/{id}/edit (groupId=${partTimeGroupId}, id=${partTimeId})}"
       th:object="${partTimeForm}"
@@ -79,10 +80,18 @@
         const overtimeAllowanceInput = document.getElementById('overtimeAllowance');
         const nightAllowanceInput = document.getElementById('nightAllowance');
 
+        const editPartTimeForm = document.getElementById('edit-parttime-form');
+        const editButton = document.getElementById('joinButton');
+
         hourPriceInput.addEventListener('input', () => {
             const hourPrice = hourPriceInput.value;
             overtimeAllowanceInput.value = Math.ceil(hourPrice * 0.5);
             nightAllowanceInput.value = Math.ceil(hourPrice * 0.5);
+        })
+
+        editButton.addEventListener('click', () => {
+            if(confirm("이미 입력된 근로장학은 모두 미승인상태로 돌아갑니다.\n그래도 생성하시겠습니가?"))
+                editPartTimeForm.submit();
         })
 
     });

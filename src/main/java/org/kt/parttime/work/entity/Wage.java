@@ -26,7 +26,11 @@ public class Wage extends BaseTimeEntity {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "part_time_group_id")
-    private PartTimeGroup pratTimeGroup;
+    private PartTimeGroup partTimeGroup;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "part_time_id")
+    private PartTime partTime;
 
     @Column
     private Integer year;
@@ -35,46 +39,32 @@ public class Wage extends BaseTimeEntity {
     private Integer month;
 
     @Column(nullable = false)
-    private Integer firstWeekWage = 0;
+    private double workTime;
 
     @Column(nullable = false)
-    private Integer secondWeekWage = 0;
+    private Integer hourPrice = 0;
 
-    @Column(nullable = false)
-    private Integer thirdWeekWage = 0;
-
-    @Column(nullable = false)
-    private Integer fourthWeekWage = 0;
-
-    @Column(nullable = false)
-    private Integer fifthWeekWage = 0;
-
-    @Column(nullable = false)
-    private Integer sixthWeekWage = 0;
-
-    public Wage(Student student, PartTimeGroup pratTimeGroup, Integer year, Integer month) {
+    public Wage(Student student, PartTimeGroup partTimeGroup, Integer year, Integer month) {
         this.student = student;
-        this.pratTimeGroup = pratTimeGroup;
+        this.partTimeGroup = partTimeGroup;
         this.year = year;
         this.month = month;
     }
 
-    public void updateWage(int month, int wage){
-        if(month == 1) this.firstWeekWage = wage;
-        else if(month == 2) this.secondWeekWage = wage;
-        else if(month == 3) this.thirdWeekWage = wage;
-        else if(month == 4) this.fourthWeekWage = wage;
-        else if(month == 5) this.fifthWeekWage = wage;
-        else if(month == 6) this.sixthWeekWage = wage;
+    public Wage(Student student, PartTimeGroup partTimeGroup, PartTime partTime, Integer year, Integer month) {
+        this.student = student;
+        this.partTimeGroup = partTimeGroup;
+        this.partTime = partTime;
+        this.year = year;
+        this.month = month;
+    }
+
+    public void updateWorkTime(double workTime, int hourPrice){
+        this.workTime = workTime;
+        this.hourPrice = hourPrice;
     }
 
     public int getMonthlyWage(){
-        int wage = firstWeekWage;
-        wage += secondWeekWage;
-        wage += thirdWeekWage;
-        wage += fourthWeekWage;
-        wage += fifthWeekWage;
-        wage += sixthWeekWage;
-        return wage;
+        return (int) Math.round(workTime * hourPrice);
     }
 }

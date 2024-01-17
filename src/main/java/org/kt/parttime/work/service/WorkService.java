@@ -6,16 +6,14 @@ import org.kt.parttime.common.dto.TimeQuery;
 import org.kt.parttime.parttime.entity.PartTime;
 import org.kt.parttime.parttime.entity.PartTimeGroup;
 import org.kt.parttime.parttime.entity.StudentPartTimeGroup;
-import org.kt.parttime.parttime.repository.PartTimeGroupRepository;
 import org.kt.parttime.parttime.repository.PartTimeRepository;
 import org.kt.parttime.parttime.repository.StudentPartTimeGroupRepository;
 import org.kt.parttime.user.dto.StudentWageDetailDto;
-import org.kt.parttime.user.dto.StudentWageDto;
 import org.kt.parttime.user.entity.Admin;
 import org.kt.parttime.user.entity.Student;
 import org.kt.parttime.user.repository.AdminRepository;
-import org.kt.parttime.user.repository.StudentRepository;
 import org.kt.parttime.utils.WageExcelUtils;
+import org.kt.parttime.work.dto.MonthlyWorkDto;
 import org.kt.parttime.work.dto.WorkDetailPageDto;
 import org.kt.parttime.work.dto.WorkDto;
 import org.kt.parttime.work.entity.Wage;
@@ -68,7 +66,7 @@ public class WorkService {
         Work work = workRepository.findByPartTimeGroupAndStudentIdWithStudentAndPartTimeGroup(partTimeGroupId, userId, workId)
                 .orElseThrow(ForbiddenWorkException::new);
         workRepository.delete(work);
-        updateWage(work, work.getStudent(), work.getPartTimeGroup());
+        updateWage(work, work.getStudent(), work.getPartTimeGroup(), work.getPartTime());
         return new WorkDto(work);
     }
 
@@ -76,51 +74,51 @@ public class WorkService {
     public WorkDto approveWork(Long partTimeGroupId, Long approverId, Long workId, Long studentId) {
         Admin admin = adminRepository.findById(approverId)
                 .orElseThrow(ForbiddenWorkException::new);
-        Work work = workRepository.findByPartTimeGroupAndStudentIdWithStudentAndPartTimeGroup(partTimeGroupId, studentId, workId)
+        Work work = workRepository
+                .findByPartTimeGroupAndStudentIdWithStudentAndPartTimeGroup(partTimeGroupId, studentId, workId)
                 .orElseThrow(ForbiddenWorkException::new);
         work.approve(admin);
         workRepository.save(work);
-        updateWage(work, work.getStudent(), work.getPartTimeGroup());
+        updateWage(work, work.getStudent(), work.getPartTimeGroup(), work.getPartTime());
         return new WorkDto(work);
     }
 
     @Transactional
-    public WorkDto rejectWork(Long partTimeGroupId, Long rejectorId, Long workId, Long studentId) {
+    public WorkDto rejectWork(Long partTimeGroupId, Long rejectorId, Long workId, Long studentId, String rejectMessage) {
         Admin admin = adminRepository.findById(rejectorId)
                 .orElseThrow(ForbiddenWorkException::new);
         Work work = workRepository.findByPartTimeGroupAndStudentIdWithStudentAndPartTimeGroup(partTimeGroupId, studentId, workId)
                 .orElseThrow(ForbiddenWorkException::new);
-        work.reject(admin);
+        work.reject(admin, rejectMessage);
         workRepository.save(work);
-        updateWage(work, work.getStudent(), work.getPartTimeGroup());
+        updateWage(work, work.getStudent(), work.getPartTimeGroup(), work.getPartTime());
         return new WorkDto(work);
     }
 
-    private void updateWage(Work work, Student student, PartTimeGroup partTimeGroup){
+    private void updateWage(Work work, Student student, PartTimeGroup partTimeGroup, PartTime partTime){
         TimeQuery time = TimeQuery.of(work.getYear(), work.getMonth());
-        Wage wage = wageRepository.findByStudentAndPratTimeGroupAndYearAndMonth(student, partTimeGroup, work.getYear(), work.getMonth())
-                .orElseGet(() -> new Wage(student, partTimeGroup, work.getYear(), work.getMonth()));
-        List<Work> weeklyWorks = workRepository.findAllByStudentPartTimeGroupAndNotRejected(
-                partTimeGroup,
-                student,
-                time.thisLocalDateTimeFirstDayOfWeek(work.getWeek()),
-                time.thisLocalDateTimeLastDayOfWeek(work.getWeek())
-        );
+        List<Wage> wageList = wageRepository.findByStudentAndPartTimeGroupAndYearAndMonth(student, partTimeGroup, work.getYear(), work.getMonth());
 
-        int weeklyWage = weeklyWorks.stream()
-                .map(Work::calculateDailyWage)
-                .mapToInt(Integer::intValue)
-                .sum();
-        weeklyWage += partTimeGroup.calculateHolidayAllowance(weeklyWorks);
-        wage.updateWage(work.getWeek(), weeklyWage);
-        wageRepository.save(wage);
+        List<Work> monthlyWork = workRepository.findAllByStudentAndPartTimeGroup(
+                partTimeGroup, student, time.thisLocalDateTime(), time.nextLocalDateTime());
+
+        MonthlyWorkDto monthlyWorkDto = new MonthlyWorkDto(monthlyWork);
+
+        partTimeGroup.getPartTimes()
+                        .forEach(p -> {
+                            Wage wage = wageList.stream().filter(w -> w.getPartTime() == p)
+                                    .findFirst()
+                                    .orElseGet(() -> new Wage(student, partTimeGroup, p, work.getYear(), work.getMonth()));
+                            wage.updateWorkTime(monthlyWorkDto.getConvertedWorkHour(p.getId()), p.getHourPrice());
+                            wageRepository.save(wage);
+                        });
     }
 
     @Transactional(readOnly = true)
     public Workbook makeExcel(TimeQuery timeQuery){
         List<StudentWageDetailDto> studentWage = wageRepository
                 .findYearAndMonth(timeQuery.getYear(), timeQuery.getMonth())
-                .stream().map(w -> new StudentWageDetailDto(w.getPratTimeGroup(), w.getStudent(), w.getMonthlyWage()))
+                .stream().map(w -> new StudentWageDetailDto(w.getPartTimeGroup(), w.getStudent(), w))
                 .toList();
         return WageExcelUtils.makeExcel(studentWage);
     }

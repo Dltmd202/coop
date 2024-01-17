@@ -32,7 +32,6 @@ public class WorkDetailDto {
             super.pureWage = 0;
             super.nightWage = 0;
             super.overTimeWage = 0;
-            super.totalWage = 0;
             super.accumulatedTotalWage = 0;
         }
         @Override
@@ -42,6 +41,7 @@ public class WorkDetailDto {
     }
 
     private Long id;
+    private Long partTimeId;
     private String partTimeName;
     private Integer partTimeHourPrice;
     private Integer nightHourPrice;
@@ -57,12 +57,14 @@ public class WorkDetailDto {
     private Integer pureWage;
     private Integer nightWage;
     private Integer overTimeWage;
-    private Integer totalWage;
     private Integer accumulatedTotalWage = 0;
     private String status;
+    private String confirmerName;
+    private String message;
 
     public WorkDetailDto(Work work){
         this.id = work.getId();
+        this.partTimeId = work.getPartTime().getId();
         this.partTimeHourPrice = work.getPartTime().getHourPrice();
         this.nightHourPrice = work.getPartTime().getNightAllowance();
         this.overHourPrice = work.getPartTime().getOvertimeAllowance();
@@ -76,20 +78,39 @@ public class WorkDetailDto {
         this.nightWage = work.calculateDailyNightAllowance();
         this.overTimeWage = work.calculateDailyOvertimeAllowance();
         this.pureWage = work.calculateDailyPureWage();
-        this.totalWage = this.nightWage + this.overTimeWage + this.pureWage;
         this.status = work.getStatus().name();
+        this.confirmerName = work.getConfirmerName();
+        this.message = work.getMessage();
+    }
+
+    public Integer getWageIncludeNightAllowance(){
+        return this.pureWage + this.nightWage;
+    }
+
+    public boolean isWeekDay(){
+        DayOfWeek dayOfWeek = startTime.getDayOfWeek();
+        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+    }
+
+    public void noOverTimeWork(){
+        this.overWorkTime = 0.F;
+        this.overTimeWage = 0;
     }
 
     public WorkDetailDto accumulate(WorkDetailDto target){
         if(!target.nonRejected()) return target;
         target.accumulatedWorkTime = this.accumulatedWorkTime + target.workTime;
-        target.accumulatedTotalWage = this.accumulatedTotalWage + target.totalWage;
+        target.accumulatedTotalWage = this.accumulatedTotalWage + target.getTotalWage();
         if(!target.isWeekend()) target.accumulatedWeekdayWorkTime = this.accumulatedWeekdayWorkTime + target.workTime;
         return target;
     }
 
+    public Integer getTotalWage(){
+        return this.nightWage + this.overTimeWage + this.pureWage;
+    }
+
     public String getFormattedTotalWage(){
-        return PriceUtils.format(this.totalWage);
+        return PriceUtils.format(getTotalWage());
     }
 
     public String getFormattedAccumulatedTotalAage(){
@@ -156,8 +177,17 @@ public class WorkDetailDto {
         else return "table-success";
     }
 
+    public boolean isConfirmed(){
+        return this.status.equals("CONFIRMED");
+    }
+
     public String getFormattedPartTimeHourPrice(){
         return PriceUtils.format(this.partTimeHourPrice);
     }
 
+    public float getConvertedWorkTime(){
+        return this.getWorkTime() +
+                this.getNightWorkTime() / 2 +
+                this.getOverWorkTime() / 2;
+    }
 }

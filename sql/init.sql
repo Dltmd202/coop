@@ -1,4 +1,3 @@
-
 create table part_time_group
 (
     id                 bigint auto_increment
@@ -23,7 +22,7 @@ create table part_time
     semester           int          null,
     year               int          null,
     part_time_group_id bigint       null,
-    constraint FK9h46qrqk2kn21mga8ha7g593l
+    constraint fk_part_time_group_id
         foreign key (part_time_group_id) references part_time_group (id)
 );
 
@@ -38,7 +37,7 @@ create table user
     name               varchar(10)  null,
     password           varchar(255) not null,
     role               varchar(255) null,
-    constraint UK_ob8kqyqqgmefl0aco34akdtpe
+    constraint uk_email
         unique (email)
 );
 
@@ -47,7 +46,7 @@ create table admin
     position varchar(20) null,
     id       bigint      not null
         primary key,
-    constraint FK1ja8rua032fgnk9jmq7du3b3a
+    constraint fk_user
         foreign key (id) references user (id)
 );
 
@@ -63,9 +62,9 @@ create table student
     student_id   varchar(20)  null,
     id           bigint       not null
         primary key,
-    constraint UK_lh7am6sc9pv0nhyg7qkj7w5d3
+    constraint uk_student_id
         unique (student_id),
-    constraint FKqytew32213tbnj8u0er377k3q
+    constraint fk_user
         foreign key (id) references user (id)
 );
 
@@ -77,10 +76,11 @@ create table student_part_time_group
     last_modified_date datetime null,
     part_time_group_id bigint   null,
     student_id         bigint   null,
-    constraint FKejhetonisg4txtfewssbuwuta
+    constraint fk_part_time_group
         foreign key (part_time_group_id) references part_time_group (id),
-    constraint FKlr6ioq2q4ow9lkewf15u2ddpq
-        foreign key (student_id) references student (id)
+    constraint fk_student
+        foreign key (student_id) references student (id),
+    index ix_student_id__ptg_id(student_id, part_time_group_id)
 );
 
 create table wage
@@ -89,20 +89,20 @@ create table wage
         primary key,
     created_date       datetime null,
     last_modified_date datetime null,
-    fifth_week_wage    int      not null,
-    first_week_wage    int      not null,
-    fourth_week_wage   int      not null,
+    hour_price         int      not null,
     month              int      null,
-    second_week_wage   int      not null,
-    sixth_week_wage    int      not null,
-    third_week_wage    int      not null,
+    work_time          double   not null,
     year               int      null,
+    part_time_id       bigint   null,
     part_time_group_id bigint   null,
     student_id         bigint   null,
-    constraint FKlmqdipng7nbbrxqt0ob3s7ll
+    constraint fk_part_time
+        foreign key (part_time_id) references part_time (id),
+    constraint fk_student
         foreign key (student_id) references student (id),
-    constraint FKq6d8tl5kv74dwnd3a2ovdrr9h
-        foreign key (part_time_group_id) references part_time_group (id)
+    constraint fk_part_time_group
+        foreign key (part_time_group_id) references part_time_group (id),
+    index ix_part_time_group_id__student_id(part_time_group_id, student_id)
 );
 
 create table work
@@ -123,14 +123,15 @@ create table work
     part_time_group_id         bigint       null,
     student_id                 bigint       null,
     student_part_time_group_id bigint       null,
-    constraint FK3x7nfcg2v6itg7juqm487qi55
+    constraint fk_student
         foreign key (student_id) references student (id),
-    constraint FKirk6v0yilqoylhfbsiw5cypad
+    constraint fk_part_time
         foreign key (part_time_id) references part_time (id),
-    constraint FKl30r9qfspi2omos0qk6yl735d
+    constraint fk_part_time_group
         foreign key (part_time_group_id) references part_time_group (id),
-    constraint FKoe42moq4r1mgdkwb7iqaqa52r
+    constraint fk_admin
         foreign key (confirmer_id) references admin (id),
-    constraint FKr80vdgxdre49iqwvryk9opkwo
-        foreign key (student_part_time_group_id) references student_part_time_group (id)
+    constraint fk_student_part_time_group
+        foreign key (student_part_time_group_id) references student_part_time_group (id),
+    index ix_part_time_group_id__student_id__status(part_time_group_id, student_id, status)
 );

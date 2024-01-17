@@ -14,7 +14,7 @@
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader"/>
     <h2>근로장학 추가</h2>
-    <form role="form" action="/parttimes/new" th:object="${partTimeForm}" method="post">
+    <form id="new-parttime-form" role="form" action="/parttimes/new" th:object="${partTimeForm}" method="post">
         <div class="form-group mt-4 d-flex">
             <div class="w-25">
                 <label th:for="grade">년도</label>
@@ -116,6 +116,9 @@
         const groupTypeCreate = document.getElementById('group-type-create');
         const groupTypeSelect = document.getElementById('group-type-select');
 
+        const partTimeForm = document.getElementById('new-parttime-form');
+        const joinButton = document.getElementById('joinButton');
+
 
         const refreshGroupList = async() =>{
             const year = yearInput.value;
@@ -123,7 +126,6 @@
 
             if (!year || !semester) return;
             try {
-                console.log('hi');
                 const response = await fetch(`/api/group-parttimes?year=${year}&semester=${semester}`);
 
                 if (!response.ok) {
@@ -176,6 +178,11 @@
                 groupCreate.classList.remove('is-invalid');
             }
             await refreshGroupList();
+        })
+
+        joinButton.addEventListener('click', () => {
+            if(confirm("이미 입력된 근로장학은 모두 미승인상태로 돌아갑니다.\n그래도 생성하시겠습니가?"))
+                joinButton.submit();
         })
     });
 </script>

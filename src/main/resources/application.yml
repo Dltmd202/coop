@@ -6,7 +6,10 @@ spring:
         default_batch_fetch_size: 20
         show_sql: true
         format_sql: true
+
     database: mysql
+    hibernate:
+      ddl-auto: update
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/part_time
@@ -17,11 +20,16 @@ server:
     session:
       timeout: 86400
       tracking-modes: cookie
+  port:
 logging:
   level:
     org:
       springframework:
         web:
           servlet: error
+    hibernate:
+      type:
+        descriptor:
+          sql: trace
     com.zaxxer.hikari: TRACE
     com.com.zaxxer.HikariConfig: DEBUG

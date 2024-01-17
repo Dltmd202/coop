@@ -19,7 +19,7 @@ public class WorkDetailPageDto {
     private List<PartTimeBriefDto> partTimes;
 
     public WorkDetailPageDto(StudentPartTimeGroup studentPartTimeGroup, List<Work> works){
-        this.monthlyWork = new MonthlyWorkDto(works, studentPartTimeGroup.getPartTimeGroup());
+        this.monthlyWork = new MonthlyWorkDto(works);
         this.partTimeGroup = new PartTimeGroupDto(studentPartTimeGroup.getPartTimeGroup());
         this.student = new StudentDto(studentPartTimeGroup.getStudent());
         this.partTimes = studentPartTimeGroup.getPartTimeGroup()

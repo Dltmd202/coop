@@ -1,11 +1,6 @@
 package org.kt.parttime.parttime.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.kt.parttime.common.dto.TimeQuery;
 import org.kt.parttime.parttime.dto.*;
 import org.kt.parttime.parttime.entity.PartTime;
@@ -15,19 +10,19 @@ import org.kt.parttime.parttime.exception.InvalidPartTimeJoinException;
 import org.kt.parttime.parttime.exception.NotFoundPartTimeException;
 import org.kt.parttime.parttime.repository.PartTimeGroupRepository;
 import org.kt.parttime.parttime.repository.PartTimeRepository;
+import org.kt.parttime.parttime.repository.StudentPartTimeGroupRepository;
 import org.kt.parttime.user.dto.StudentWageDto;
 import org.kt.parttime.user.entity.Student;
 import org.kt.parttime.user.repository.StudentRepository;
-import org.kt.parttime.utils.WageExcelUtils;
 import org.kt.parttime.work.entity.Wage;
 import org.kt.parttime.work.repository.WageRepository;
+import org.kt.parttime.work.repository.WorkRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 
 @Service
@@ -37,11 +32,16 @@ public class PartTimeService {
     private final StudentRepository studentRepository;
     private final WageRepository wageRepository;
     private final PartTimeGroupRepository partTimeGroupRepository;
+    private final WorkRepository workRepository;
+    private final StudentPartTimeGroupRepository studentPartTimeGroupRepository;
 
     @Transactional
     public void createPartTime(PartTimeForm partTimeForm){
         PartTimeGroup partTimeGroup = extractPartTimeGroupFromPartTimeForm(partTimeForm);
+
         PartTime partTime = partTimeForm.makePartTime();
+        vacatePartTimeGroupConfirmStatus(partTimeGroup);
+
         partTimeGroup.joinPartTime(partTime);
         partTimeGroupRepository.save(partTimeGroup);
     }
@@ -76,8 +76,8 @@ public class PartTimeService {
     public void updatePartTime(Long partTimeId, PartTimeEditForm partTimeEditForm) {
         PartTime partTime = partTimeRepository.findByIdWithPartTimeGroup(partTimeId)
                 .orElseThrow(NotFoundPartTimeException::new);
+        vacatePartTimeGroupConfirmStatus(partTime.getPartTimeGroup());
 
-        // TODO 근장 수정되면 급여 리프레시
         partTime.update(partTimeEditForm);
     }
 
@@ -87,11 +87,12 @@ public class PartTimeService {
                 .orElseThrow(NotFoundPartTimeException::new);
 
         List<Student> students = studentRepository.findStudentByPartTimeGroupId(partTimeGroupId);
+        List<Wage> wages = wageRepository.findByPartTimeGroupAndYearAndMonth(partTimeGroup, timeQuery.getYear(), timeQuery.getMonth());
         List<StudentWageDto> wageStudents = students.stream()
                 .map(s -> {
-                    Wage wage = wageRepository.findByStudentAndPratTimeGroupAndYearAndMonth(s, partTimeGroup, timeQuery.getYear(), timeQuery.getMonth())
-                            .orElseGet(() -> new Wage(s, partTimeGroup, timeQuery.getYear(), timeQuery.getMonth()));
-                    return new StudentWageDto(s, wage.getMonthlyWage());
+                    List<Wage> wage = wages.stream().filter(w -> w.getStudent() == s).toList();
+                    int monthlyWage = wage.stream().map(Wage::getMonthlyWage).mapToInt(Integer::intValue).sum();
+                    return new StudentWageDto(s, monthlyWage);
                 })
                 .toList();
         return new PartTimeGroupDetailDto(partTimeGroup, wageStudents);
@@ -115,6 +116,12 @@ public class PartTimeService {
             return partTimeGroupRepository.findById(partTimeForm.getGroupSelect())
                     .orElseThrow(IllegalAccessError::new);
         throw new InvalidPartTimeJoinException();
+    }
+
+    private void vacatePartTimeGroupConfirmStatus(PartTimeGroup partTimeGroup){
+        List<Wage> wage = wageRepository.findByPartTimeGroup(partTimeGroup);
+        wageRepository.deleteAll(wage);
+        workRepository.vacateStatusAndConfirm(partTimeGroup);
     }
 
 

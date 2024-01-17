@@ -151,6 +151,7 @@ public class WorkController {
     ){
         if(Objects.isNull(user) || !user.isAdmin()) return "redirect:/";
 
+
         WorkDto workDto = workService.approveWork(partTimeGroupId, user.getUserId(), workId, studentId);
         return String.format(
                 "redirect:/parttime-groups/%d/students/%d/works?year=%d&month=%d",
@@ -162,11 +163,12 @@ public class WorkController {
             @PathVariable Long partTimeGroupId,
             @PathVariable Long workId,
             @PathVariable Long studentId,
-            @AuthenticatedUser AuthenticatedUserDto user
+            @AuthenticatedUser AuthenticatedUserDto user,
+            @RequestParam String rejectMessage
     ){
         if(Objects.isNull(user) || !user.isAdmin()) return "redirect:/";
 
-        WorkDto workDto = workService.rejectWork(partTimeGroupId, user.getUserId(), workId, studentId);
+        WorkDto workDto = workService.rejectWork(partTimeGroupId, user.getUserId(), workId, studentId, rejectMessage);
         return String.format(
                 "redirect:/parttime-groups/%d/students/%d/works?year=%d&month=%d",
                 partTimeGroupId, studentId, workDto.getYear(), workDto.getMonth());

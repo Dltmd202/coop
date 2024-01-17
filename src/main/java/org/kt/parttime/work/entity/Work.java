@@ -72,6 +72,9 @@ public class Work extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private WorkStatus status;
 
+    @Column(length = 1000)
+    private String message;
+
     public Work(StudentPartTimeGroup studentPartTimeGroup, PartTime partTime, LocalDateTime startTime, LocalDateTime endTime){
         this.studentPartTimeGroup = studentPartTimeGroup;
         this.student = studentPartTimeGroup.getStudent();
@@ -100,10 +103,11 @@ public class Work extends BaseTimeEntity {
         this.status = WorkStatus.CONFIRMED;
     }
 
-    public void reject(Admin rejecter){
+    public void reject(Admin rejecter, String rejectMessage){
         this.confirmer = rejecter;
         this.confirmerName = rejecter.getName();
         this.status = WorkStatus.REJECTED;
+        this.message = rejectMessage;
     }
 
     public Integer calculateDailyWage(){

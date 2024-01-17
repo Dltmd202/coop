@@ -12,6 +12,17 @@
         text-align: center;
     }
 
+    .confirmer {
+        color: #0d6efd;
+        cursor: pointer;
+        text-decoration-line: underline;
+    }
+
+    .confirmer:hover {
+        color: #0b58ca;
+        text-decoration: underline;
+    }
+
   </style>
 </head>
 </style>
@@ -70,9 +81,16 @@
   <div class="h-100">
     <div class="my-3 p-3 bg-body rounded shadow-sm">
       <div th:each="works : ${monthlyWork.getWeeklyWorks().values()}" class="mb-5">
-        <div class="d-flex">
-          <h5 th:text="${works.week}">1</h5>
-          <h5 class="ms-1">주차</h5>
+        <div class="d-flex justify-content-between">
+          <div class="d-flex">
+            <h5 th:text="${works.week}">1</h5>
+            <h5 class="ms-1">주차</h5>
+          </div>
+          <div>
+            <span>주휴수당</span>
+            <span class="ms-2" th:text="${works.getFormattedHolidayAllowance()}"></span>
+            <span class="ms-1">원</span>
+          </div>
         </div>
         <div>
           <table class="table table-striped">
@@ -88,6 +106,7 @@
               <th class="d-none d-lg-table-cell">주간근무합계</th>
               <th>일급</th>
               <th class="d-none d-md-table-cell">누적일급</th>
+              <th class="d-none d-md-table-cell">승인</th>
               <th></th>
             </tr>
             </thead>
@@ -113,6 +132,16 @@
                 <td class="d-none d-lg-table-cell" th:text="${work.getAccumulatedWeekdayWorkTime()}"></td>
                 <td th:text="${work.getFormattedTotalWage()}"></td>
                 <td class="d-none d-md-table-cell" th:text="${work.getFormattedAccumulatedTotalAage()}"></td>
+                <td class="d-none d-md-table-cell">
+                  <p
+                    th:if="${!work.isConfirmed()}"
+                    th:attr="data-message=${work.getMessage()}"
+                    th:id="'comment' + ${work.id}"
+                    th:onclick="'alertComment(\'comment' + ${work.id} + '\');'"
+                    th:text="${work.getConfirmerName()}"
+                    class="confirmer">이승환</p>
+                  <p th:if="${work.isConfirmed()}" th:text="${work.getConfirmerName()}">이승환</p>
+                </td>
                 <td>
                   <form th:if="${session.LOGIN_MEMBER.role == 'STUDENT'}"
                     th:action="@{/parttime-groups/{id}/works/{workId}/delete (id=${partTimeGroup.id}, workId=${work.getId()})}"
@@ -253,8 +282,22 @@
 
   const rejectWork = (workId) => {
     const form = document.getElementById(`reject-${workId}`);
-    if(confirm("정말 반려하시겠습니까?")) form.submit();
-    else return false;
+    const message = prompt("정말 반려하시겠습니까?");
+    if(message.length >= 1000) alert("반려 메시지는 1000자 이상 입력할 수 없습니다.")
+    else if(message != null){
+      const rejectMessageInput = document.createElement("input");
+      rejectMessageInput.type = "hidden";
+      rejectMessageInput.name = "rejectMessage";
+      rejectMessageInput.id = "rejectMessage";
+      rejectMessageInput.value = message;
+      form.appendChild(rejectMessageInput);
+      form.submit();
+    }
+  }
+
+  const alertComment = (id) => {
+    const msg = document.getElementById(id).getAttribute('data-message') || '코멘트가 없습니다.';
+    alert(msg);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -294,6 +337,11 @@
         newWorkSubmitButton.setAttribute('disabled', undefined);
         newWorkSubmitButton.classList.add('disabled');
       }
+
+      const startTime = startTimeInput.value;
+      const endTime = endTimeInput.value;
+
+      if(startTime > endTime) endTimeInput.value = startTime;
     })
 
     endTimeInput.addEventListener('blur', () => {
@@ -306,6 +354,11 @@
         newWorkSubmitButton.setAttribute('disabled', undefined);
         newWorkSubmitButton.classList.add('disabled');
       }
+
+      const startTime = startTimeInput.value;
+      const endTime = endTimeInput.value;
+
+      if(startTime > endTime) startTimeInput.value = endTime;
     })
 
   })

@@ -28,8 +28,7 @@ public class WageApiController {
     public ResponseEntity<byte[]> createExcel(
             @AuthenticatedUser AuthenticatedUserDto user,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month,
-            HttpServletResponse response
+            @RequestParam(required = false) Integer month
     ){
         if(Objects.isNull(user) || !user.isAdmin()) return null;
         TimeQuery timeQuery = TimeQuery.of(year, month);
