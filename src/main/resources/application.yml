@@ -4,8 +4,6 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 20
-        show_sql: true
-        format_sql: true
 
     database: mysql
     hibernate:
@@ -23,13 +21,4 @@ server:
   port:
 logging:
   level:
-    org:
-      springframework:
-        web:
-          servlet: error
-    hibernate:
-      type:
-        descriptor:
-          sql: trace
-    com.zaxxer.hikari: TRACE
-    com.com.zaxxer.HikariConfig: DEBUG
+    org.kt.parttime: INFO
