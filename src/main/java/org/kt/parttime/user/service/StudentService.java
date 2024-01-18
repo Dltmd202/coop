@@ -49,7 +49,9 @@ public class StudentService {
 
         if(studentForm.getEmail().equals(student.getEmail()) && studentForm.getStudentId().equals(student.getStudentId()))
             return student;
-        if(studentRepository.existsByStudentIdOrEmail(studentForm.getStudentId(), studentForm.getEmail()))
+        else if(!studentForm.getEmail().equals(student.getEmail()) && studentRepository.existsByEmail(studentForm.getEmail()))
+            throw new AlreadyExistsStudentException();
+        else if(!studentForm.getStudentId().equals(student.getStudentId()) && studentRepository.existsByStudentId(studentForm.getStudentId()))
             throw new AlreadyExistsStudentException();
         return student;
     }

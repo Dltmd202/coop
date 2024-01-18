@@ -98,7 +98,8 @@ public class WorkController {
             @Valid WorkForm workForm,
             BindingResult result
     ){
-        if(Objects.isNull(user)) return "redirect:/";
+        // TODO 어드민 다시 한 번 확인하기
+        if(Objects.isNull(user) || !user.isAdmin()) return "redirect:/";
         if(result.hasErrors())
             return String.format(
                 "redirect:/parttime-groups/%d/students/%d/works?year=%d&month=%d",

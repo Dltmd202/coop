@@ -3,7 +3,6 @@ package org.kt.parttime.user.service;
 import lombok.RequiredArgsConstructor;
 import org.kt.parttime.parttime.entity.PartTimeGroup;
 import org.kt.parttime.parttime.repository.PartTimeGroupRepository;
-import org.kt.parttime.parttime.repository.PartTimeRepository;
 import org.kt.parttime.user.dto.*;
 import org.kt.parttime.user.entity.Student;
 import org.kt.parttime.user.entity.User;
@@ -25,7 +24,6 @@ public class UserService {
     private final AdminRepository adminRepository;
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PartTimeRepository partTimeRepository;
     private final PartTimeGroupRepository partTimeGroupRepository;
 
     @Transactional(readOnly = true)
