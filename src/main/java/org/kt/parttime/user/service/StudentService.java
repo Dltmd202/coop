@@ -40,6 +40,9 @@ public class StudentService {
 
     @Transactional
     public void editStudent(Long userId, StudentForm studentForm) {
+        if(studentRepository.existsByStudentIdOrEmail(studentForm.getStudentId(), studentForm.getEmail()))
+            throw new AlreadyExistsStudentException();
+
         Student student = studentRepository.findById(userId)
                 .orElseThrow(NotFoundStudentException::new);
         student.update(studentForm);
