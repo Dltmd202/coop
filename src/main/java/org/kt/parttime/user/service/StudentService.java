@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.kt.parttime.user.dto.StudentDto;
 import org.kt.parttime.user.dto.StudentForm;
 import org.kt.parttime.user.entity.Student;
+import org.kt.parttime.user.exception.AlreadyExistsStudentException;
 import org.kt.parttime.user.exception.NotFoundStudentException;
 import org.kt.parttime.user.repository.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,8 @@ public class StudentService {
 
     @Transactional
     public Long studentJoin(StudentForm studentForm){
+        if(studentRepository.existsByStudentIdOrEmail(studentForm.getStudentId(), studentForm.getEmail()))
+            throw new AlreadyExistsStudentException();
         Student student = studentForm.toModel();
         student.signup(passwordEncoder);
         studentRepository.save(student);

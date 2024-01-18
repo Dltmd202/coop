@@ -9,6 +9,8 @@ import java.util.List;
 public interface StudentRepository extends JpaRepository<Student, Long> {
     boolean existsByStudentId(String studentId);
 
+    boolean existsByStudentIdOrEmail(String studentId, String email);
+
     @Query("select sptg.student from StudentPartTimeGroup sptg where sptg.partTimeGroup.id = :partTimeGroupId")
     List<Student> findStudentByPartTimeGroupId(Long partTimeGroupId);
 
