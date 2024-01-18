@@ -40,11 +40,17 @@ public class StudentService {
 
     @Transactional
     public void editStudent(Long userId, StudentForm studentForm) {
+        Student student = validateEditStudent(userId, studentForm);
+        student.update(studentForm);
+    }
+
+    private Student validateEditStudent(Long userId, StudentForm studentForm){
+        Student student = studentRepository.findById(userId).orElseThrow(NotFoundStudentException::new);
+
+        if(studentForm.getEmail().equals(student.getEmail()) && studentForm.getStudentId().equals(student.getStudentId()))
+            return student;
         if(studentRepository.existsByStudentIdOrEmail(studentForm.getStudentId(), studentForm.getEmail()))
             throw new AlreadyExistsStudentException();
-
-        Student student = studentRepository.findById(userId)
-                .orElseThrow(NotFoundStudentException::new);
-        student.update(studentForm);
+        return student;
     }
 }
